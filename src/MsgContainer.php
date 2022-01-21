@@ -24,7 +24,7 @@ class MsgContainer
      * @param int $code
      * @param null $data
      */
-    public function __construct(string $message = '', int $code = ApiResponseCode::SUCCESS, $data = null)
+    public function __construct(string $message = '', int $code = ApiCode::SUCCESS, $data = null)
     {
         $this->message = $message;
         $this->code = $code;
@@ -97,7 +97,7 @@ class MsgContainer
      * @param null $data
      * @return MsgContainer
      */
-    public static function msg(string $message, int $code = ApiResponseCode::ERROR, $data = null)
+    public static function msg(string $message, int $code = ApiCode::ERROR, $data = null)
     {
         return new self($message, $code, $data);
     }

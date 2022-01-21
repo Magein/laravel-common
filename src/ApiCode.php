@@ -2,7 +2,7 @@
 
 namespace Magein\Common;
 
-class ApiResponseCode
+class ApiCode
 {
     /**
      * 成功

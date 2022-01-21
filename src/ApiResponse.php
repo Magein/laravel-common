@@ -15,7 +15,7 @@ class ApiResponse
      * @param mixed $data
      * @return Response|ResponseFactory
      */
-    public static function data(int $code = ApiResponseCode::SUCCESS, string $msg = '', $data = null)
+    public static function data(int $code = ApiCode::SUCCESS, string $msg = '', $data = null)
     {
         if ($data instanceof Collection && $data->isEmpty()) {
             $data = null;
@@ -45,7 +45,7 @@ class ApiResponse
      */
     public static function success($data = [], $msg = '')
     {
-        return self::data(ResponseCode::SUCCESS, $msg, $data);
+        return self::data(ApiCode::SUCCESS, $msg, $data);
     }
 
     /**
@@ -54,7 +54,7 @@ class ApiResponse
      * @param mixed $data
      * @return Response|ResponseFactory
      */
-    public static function error(string $msg = '', int $code = ResponseCode::ERROR, $data = [])
+    public static function error(string $msg = '', int $code = ApiCode::ERROR, $data = [])
     {
         return self::data($code, $msg, $data);
     }
