@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace Magein\Common;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Jenssegers\Mongodb\Eloquent\Model as Eloquent;
