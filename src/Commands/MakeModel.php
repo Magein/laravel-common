@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace Magein\Common\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
@@ -26,7 +26,7 @@ class MakeModel extends Command
      *
      * @var string
      */
-    protected $description = 'make model.php file';
+    protected $description = '创建模型类 当使用下划线的时候，会创建二级目录 --ng 不创建二级目录';
 
     /**
      * Create a new command instance.

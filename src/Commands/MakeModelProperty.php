@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace Magein\Common\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Schema;
@@ -30,7 +30,7 @@ class MakeModelProperty extends Command
      *
      * @var string
      */
-    protected $description = 'Models目录下的模型类类都追加上"@property 属性名称"';
+    protected $description = 'Models目录下的模型类类都追加上@property 属性名称';
 
     /**
      * Create a new command instance.
@@ -55,9 +55,10 @@ class MakeModelProperty extends Command
         $name = Variable::instance()->pascal($name);
 
         $dir = $this->option('d');
-        if (is_null($dir)) {
+        if (!$dir) {
             $files = glob('./app/Models/*.php');
         } else {
+            $dir = trim($dir, '/');
             $dir = Variable::instance()->pascal($dir);
             $files = glob("./app/Models/$dir/*.php");
         }
