@@ -1,0 +1,113 @@
+<?php
+
+namespace App\Console\Commands;
+
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Schema;
+use magein\tools\common\Variable;
+
+class MakeModel extends Command
+{
+    /**
+     *
+     * 创建model
+     * mm = make model
+     *
+     * 默认继承BaseModel  --ng 表示不创建二级目录  not group
+     *
+     * php artsion mm member_auth
+     *
+     * @var string
+     */
+    protected $signature = 'mm {name?} {--ng}';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'make model.php file';
+
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    public function handle()
+    {
+        $name = $this->argument('name');
+        $group = $this->option('ng');
+
+        $dir = '';
+        $namespace = 'namespace App\Models';
+        if (!$group) {
+            $params = explode('_', $name);
+            $dir = $params[0];
+        }
+
+        if ($dir) {
+            $path = './app/Models/' . Variable::instance()->pascal($dir);
+            if (!is_dir($path)) {
+                mkdir($path, 757);
+            }
+            $namespace .= '\\' . Variable::instance()->pascal($dir);
+        }else{
+            $path = './app/Models';
+        }
+
+        $class_name = Variable::instance()->pascal($name);
+        $filename = $path . '/' . $class_name . '.php';
+
+        if (preg_match('/y$/', $name)) {
+            $attrs = Schema::getColumnListing(preg_replace('/y$/', 'ies', $name));
+        } elseif (!preg_match('/s$/', $name)) {
+            $attrs = Schema::getColumnListing($name . 's');
+        } else {
+            $attrs = Schema::getColumnListing($name);
+        }
+
+        $fillable = "[\n";
+        if ($attrs) {
+            foreach ($attrs as $attr) {
+                if (in_array($attr, ['id', 'money', 'balance', 'score', 'integral', 'created_at', 'updated_at', 'deleted_at'])) {
+                    continue;
+                }
+                $fillable .= "      '$attr',\n";
+            }
+        }
+        $fillable .= "]";
+
+        $call = function () use ($name, $dir) {
+            $this->call('mp', ['name' => $name, '--d' => $dir]);
+        };
+        if (is_file($filename)) {
+            $this->info('exist:' . $filename);
+            $call();
+            exit();
+        }
+
+        $content = <<<EOF
+<?php
+
+$namespace;
+
+use App\Models\BaseModel;
+
+class {$class_name} extends BaseModel
+{
+    protected \$fillable = $fillable;
+}
+EOF;
+
+        file_put_contents($filename, $content);
+
+        $this->info('make successful');
+
+        $call();
+    }
+}
