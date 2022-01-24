@@ -16,8 +16,8 @@ class HelperServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        if (is_file('../Common.php')) {
-            require_once '../Common.php';
+        if (is_file(__DIR__ . '/../Common.php')) {
+            require_once __DIR__ . '/../Common.php';
         }
 
         foreach (glob(app_path('Helpers') . '/*.php') as $file) {

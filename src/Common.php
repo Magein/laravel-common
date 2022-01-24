@@ -10,14 +10,16 @@ if (!function_exists('isLocal')) {
     }
 }
 
-if (!function_exists('log')) {
-    function log($message, $data)
+if (!function_exists('slog')) {
+    function slog($message, $data = '')
     {
         if ($message && empty($data)) {
-            $message = 'debug';
             $data = [$message];
-        } elseif ($message && $data && !is_array($data)) {
-            $data = [$data];
+            $message = 'debug';
+        } elseif ($message && $data) {
+            if (!is_array($data)) {
+                $data = [$data];
+            }
         } else {
             $message = 'debug';
             $data = [];
