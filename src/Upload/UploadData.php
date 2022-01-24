@@ -69,6 +69,8 @@ class UploadData
             $size = 1024 * 100;
         }
 
+        $filepath = $filepath . '/' . date('Y/m/d');
+
         $this->setSavePath($filepath);
         $this->setExtend($extend);
         $this->setSize($size);

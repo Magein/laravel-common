@@ -24,13 +24,23 @@ class UploadLocal
     /**
      * @var UploadedFile
      */
-    protected UploadedFile $file;
+    protected $file;
 
-    public function __construct(UploadedFile $file)
+    /**
+     * @var UploadData
+     */
+    protected $uploadData;
+
+    /**
+     * @param UploadedFile|null $file
+     * @param UploadData|null $uploadData
+     */
+    public function __construct(UploadedFile $file = null, UploadData $uploadData = null)
     {
         $this->name = (string)request('name', '');
         $this->field = (string)request('field', '');
-        $this->file = $file;
+        $file && $this->file = $file;
+        $uploadData && $this->uploadData = $uploadData;
     }
 
     /**
@@ -51,15 +61,36 @@ class UploadLocal
         return true;
     }
 
-    public function move(UploadData $uploadData)
+    public function move()
     {
         if (!$this->before()) {
             return MsgContainer::msg('上传出现错误');
         };
 
+        $uploadData = $this->uploadData;
+        $config = config('filesystems.upload');
+        if ($config) {
+            try {
+                $config = new $config($this->name, $this->field, $this->file);
+                if (method_exists($config, 'uploadData')) {
+                    /**
+                     * @var UploadData
+                     */
+                    $uploadData = $config->uploadData();
+                }
+            } catch (\Exception $exception) {
+                $uploadData = null;
+            }
+        }
+
+        if (empty($uploadData)) {
+            $uploadData = new UploadData();
+            $uploadData->setByMime($this->file->getMimeType());
+        }
+
         $size = $uploadData->getSize();
         $ext = $uploadData->getExtend();
-        if ($this->file->getSize() > $size * 1024) {
+        if ($this->file->getSize() > $size * 1) {
             return MsgContainer::msg('文件超出限制大小');
         }
 
@@ -67,7 +98,6 @@ class UploadLocal
         if ($ext && !in_array($origin_ext, $ext)) {
             return MsgContainer::msg('不允许的文件类型');
         }
-
         $filepath = $uploadData->getSavePath();
         $save_path = AssetPath::replaceStorageFilePath($this->file->store($filepath));
 
