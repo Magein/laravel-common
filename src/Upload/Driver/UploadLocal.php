@@ -90,8 +90,9 @@ class UploadLocal
 
         $size = $uploadData->getSize();
         $ext = $uploadData->getExtend();
-        if ($this->file->getSize() > $size * 1) {
-            return MsgContainer::msg('文件超出限制大小');
+        $allow_size = $size * 1024;
+        if ($this->file->getSize() > $allow_size) {
+            return MsgContainer::msg('文件超出限制大小:允许的最大值为' . $allow_size . 'K');
         }
 
         $origin_ext = pathinfo($this->file->getClientOriginalName(), PATHINFO_EXTENSION);
