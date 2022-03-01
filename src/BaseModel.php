@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Date;
  * @method static where($column, $operator = null, $value = null, $boolean = 'and')
  * @method static whereDate($column, $value)
  * @method static whereBetween($column, $value)
+ * @method static whereIn($column, $value)
  * @method static find($primary_key)
  */
 class BaseModel extends Model
@@ -22,13 +23,34 @@ class BaseModel extends Model
     use HasFactory, SoftDeletes;
 
     /**
-     * 当传递一个数组的时候，调用fromJson会出现错误，所以重写了
-     * @param string $value
-     * @param false $asObject
-     * @return array|mixed|string
+     * 属性转化设置成array json 进行转化
+     *
+     * 0 = [0]
+     * true、false、'' = ''
+     * 1、'1' = [1]
+     *
+     * @param $value
+     * @return false|string
      */
+    protected function asJson($value)
+    {
+        if ($value === 0 || $value === "0") {
+            $value = [0];
+        } elseif (empty($value) || is_bool($value)) {
+            return '';
+        } elseif (is_int($value) || is_string($value)) {
+            $value = [$value];
+        }
+
+        return json_encode($value);
+    }
+
     public function fromJson($value, $asObject = false)
     {
+        if (empty($value) || $value == '[]' || $value == '""' || $value === "''") {
+            return [];
+        }
+
         if (is_array($value)) {
             return $value;
         }
