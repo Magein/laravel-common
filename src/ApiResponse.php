@@ -21,7 +21,7 @@ class ApiResponse
             $data = null;
         }
 
-        if (empty($data) && $data != 0) {
+        if (empty($data) && $data !== 0 && $data !== '0') {
             $data = null;
         }
 
