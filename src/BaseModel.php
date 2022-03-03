@@ -45,6 +45,18 @@ class BaseModel extends Model
         return json_encode($value);
     }
 
+    protected function asIntJson($value)
+    {
+        if (is_array($value)) {
+            $value = array_unique($value);
+            $value = $value ? array_reduce($value, function ($value, $item) {
+                $value[] = intval($item);
+                return $value;
+            }) : [];
+        }
+        return $this->asJson($value);
+    }
+
     public function fromJson($value, $asObject = false)
     {
         if (empty($value) || $value == '[]' || $value == '""' || $value === "''") {
@@ -57,6 +69,7 @@ class BaseModel extends Model
 
         return parent::fromJson($value, $asObject);
     }
+
 
     /**
      * @return string
