@@ -73,12 +73,40 @@ class BaseModel extends Model
     /**
      * @return string
      */
+    public function getCreatedAtAttribute(): string
+    {
+        $created_at = $this->attributes['created_at'] ?? '';
+
+        if ($created_at) {
+            return Date::parse($created_at)->format('Y-m-d H:s');
+        }
+
+        return '';
+    }
+
+    /**
+     * @return string
+     */
     public function getCreatedAttribute(): string
     {
         $created_at = $this->attributes['created_at'] ?? '';
 
         if ($created_at) {
             return Date::parse($created_at)->diffForHumans();
+        }
+
+        return '';
+    }
+
+    /**
+     * @return string
+     */
+    public function getUpdatedAtAttribute(): string
+    {
+        $updated_at = $this->attributes['updated_at'] ?? '';
+
+        if ($updated_at) {
+            return Date::parse($updated_at)->format('Y-m-d H:s');
         }
 
         return '';
