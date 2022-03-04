@@ -74,7 +74,7 @@ class BaseModel extends Model
     /**
      * @return string
      */
-    public function getCreatedAtAttribute(): string
+    public function getCreatedAttribute(): string
     {
         $created_at = $this->attributes['created_at'] ?? '';
 
@@ -88,7 +88,7 @@ class BaseModel extends Model
     /**
      * @return string
      */
-    public function getUpdateAtAttribute(): string
+    public function getUpdatedAttribute(): string
     {
         $updated_at = $this->attributes['updated_at'] ?? '';
 
