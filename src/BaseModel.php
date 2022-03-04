@@ -70,7 +70,6 @@ class BaseModel extends Model
         return parent::fromJson($value, $asObject);
     }
 
-
     /**
      * @return string
      */
@@ -79,7 +78,7 @@ class BaseModel extends Model
         $created_at = $this->attributes['created_at'] ?? '';
 
         if ($created_at) {
-            return Date::parse($created_at)->format('Y-m-d H:i');
+            return Date::parse($created_at)->diffForHumans();
         }
 
         return '';
@@ -93,7 +92,7 @@ class BaseModel extends Model
         $updated_at = $this->attributes['updated_at'] ?? '';
 
         if ($updated_at) {
-            return Date::parse($updated_at)->format('Y-m-d H:i');
+            return Date::parse($updated_at)->diffForHumans();
         }
 
         return '';
