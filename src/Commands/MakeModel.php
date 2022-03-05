@@ -10,16 +10,13 @@ class MakeModel extends Command
 {
     /**
      *
-     * 创建model
-     * mm = make model
-     *
      * 默认继承BaseModel  --ng 表示不创建二级目录  not group
      *
-     * php artsion mm member_auth
+     * php artsion model:create member_auth
      *
      * @var string
      */
-    protected $signature = 'mm {name?} {--ng}';
+    protected $signature = 'model:create {name?} {--ng}';
 
     /**
      * The console command description.
@@ -56,7 +53,7 @@ class MakeModel extends Command
                 mkdir($path, 757);
             }
             $namespace .= '\\' . Variable::instance()->pascal($dir);
-        }else{
+        } else {
             $path = './app/Models';
         }
 

@@ -10,20 +10,21 @@ class MakeModelProperty extends Command
 {
     /**
      *
-     * php artisan make:command ModelProperty
-     *
      * Models目录下的所有文件，没有声明的都重新property
-     * php artisan mp
-     * 为Models\User.php的文件生成property
-     * php artisan mp:user
-     * 为Models\Member\*.php的文件生成property
-     * php artisan --d=member（会转化为pascal格式）
+     * php artisan model:property
+     *
+     * Models\User.php的文件生成property
+     * php artisan model:property user
+     *
+     * Models\Member\*.php的文件生成property,参数会转化为pascal格式
+     * php artisan model:property --dir=member
+     * php artisan model:property -D member
      *
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'mp {name?} {--d=}';
+    protected $signature = 'model:property {name?} {--D|--dir=}';
 
     /**
      * The console command description.
