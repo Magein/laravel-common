@@ -9,14 +9,22 @@ use magein\tools\common\Variable;
 class MakeModel extends Command
 {
     /**
+     * 创建的模型会默认继承 BaseModel 可以使用 --extend=laravel
      *
-     * 默认继承BaseModel  --ng 表示不创建二级目录  not group
-     *
+     * 下面命令会创建Models/Member/MemberAuth.php
      * php artsion model:create member_auth
+     *
+     * 下面命令会创建Models/MemberAuth.php
+     * php artsion model:create member_auth --ignore
+     *
+     * 下面命令会创建Models/MemberAuth.php并且继承laravel的model
+     * php artsion model:create member_auth --ignore --extend=laravel
+     * php artsion model:create member_auth --ignore -E laravel
+     *
      *
      * @var string
      */
-    protected $signature = 'model:create {name?} {--ng}';
+    protected $signature = 'model:create {name?} {--ignore} {--E|extend=}';
 
     /**
      * The console command description.
@@ -38,11 +46,17 @@ class MakeModel extends Command
     public function handle()
     {
         $name = $this->argument('name');
-        $group = $this->option('ng');
+        $ignore = $this->option('ignore');
+        $extend = $this->option('extend');
+
+        if (empty($name)) {
+            $this->error('请输入要创建的表名称');
+            exit(1);
+        }
 
         $dir = '';
         $namespace = 'namespace App\Models';
-        if (!$group) {
+        if (!$ignore) {
             $params = explode('_', $name);
             $dir = $params[0];
         }
@@ -68,6 +82,14 @@ class MakeModel extends Command
             $attrs = Schema::getColumnListing($name);
         }
 
+        if (empty($attrs)) {
+            $this->error('没有检测到表字段信息，请检查表名称');
+            $this->info('请注意：');
+            $this->info('      y结尾会转化成ies，不');
+            $this->info('      不是以s结果的会追加上s');
+            exit(1);
+        }
+
         $fillable = "[\n";
         if ($attrs) {
             foreach ($attrs as $attr) {
@@ -80,12 +102,21 @@ class MakeModel extends Command
         $fillable .= "]";
 
         $call = function () use ($name, $dir) {
-            $this->call('mp', ['name' => $name, '--d' => $dir]);
+            $this->call('model:property', ['name' => $name, '--dir' => $dir]);
         };
+
         if (is_file($filename)) {
-            $this->info('exist:' . $filename);
+            $this->error('file exists:' . $filename);
             $call();
             exit();
+        }
+
+        $extends = 'BaseModel';
+        $extends_use = 'use App\Models\BaseModel;';
+
+        if ($extend === 'laravel') {
+            $extends = 'Model';
+            $extends_use = 'use Illuminate\Database\Eloquent\Model;';
         }
 
         $content = <<<EOF
@@ -93,9 +124,9 @@ class MakeModel extends Command
 
 $namespace;
 
-use App\Models\BaseModel;
+$extends_use
 
-class {$class_name} extends BaseModel
+class {$class_name} extends $extends
 {
     protected \$fillable = $fillable;
 }

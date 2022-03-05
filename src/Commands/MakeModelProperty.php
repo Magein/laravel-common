@@ -50,12 +50,15 @@ class MakeModelProperty extends Command
      */
     public function handle()
     {
-
         $name = $this->argument('name');
+        $dir = $this->option('dir');
+
+        if (empty($name)) {
+            $this->error('请输入生成property的模型名称');
+        }
 
         $name = Variable::instance()->pascal($name);
 
-        $dir = $this->option('d');
         if (!$dir) {
             $files = glob('./app/Models/*.php');
         } else {
@@ -91,6 +94,9 @@ class MakeModelProperty extends Command
 
                 if ($attrs) {
                     foreach ($attrs as $item) {
+                        if (in_array($item, ['id', 'created_at', 'updated_at', 'deleted_at'])) {
+                            continue;
+                        }
                         $type = 'string';
                         if (preg_match('/id/', $item)) {
                             $type = 'integer';
