@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Date;
+use magein\tools\common\Variable;
 
 
 /**
@@ -21,6 +22,43 @@ use Illuminate\Support\Facades\Date;
 class BaseModel extends Model
 {
     use HasFactory, SoftDeletes;
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return mixed|null
+     */
+    public static function __callStatic($name, $arguments)
+    {
+        $underline = strripos($name, '_');
+        if ($underline >= 0) {
+            $field = substr($name, $underline + 1);
+            if (empty($field) || empty($arguments)) {
+                return null;
+            }
+            $field = Variable::instance()->underline($field);
+            $value = $arguments[0] ?? null;
+            if (empty($value)) {
+                return null;
+            }
+            $params = $arguments[1] ?? [];
+            if (!is_array($params)) {
+                return null;
+            }
+            $params[$field] = $value;
+            if ($underline === 0) {
+                return static::where($params)->first();
+            } elseif ($underline === 1) {
+                return static::where($params)->get();
+            } elseif ($underline === 2) {
+                $page_size = $params['page_size'] ?? 15;
+                unset($params['page_size']);
+                return static::where($params)->paginate($page_size);
+            }
+        }
+
+        return parent::__callStatic($name, $arguments);
+    }
 
     /**
      * 属性转化设置成array json 进行转化

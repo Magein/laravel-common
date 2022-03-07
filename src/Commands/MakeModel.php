@@ -43,6 +43,15 @@ class MakeModel extends Command
         parent::__construct();
     }
 
+    private function help()
+    {
+        $this->comment('请参考以下示列');
+        $this->info('   创建Models/Member/MemberAuth.php                  php artsion model:create member_auth');
+        $this->info('   创建Models/MemberAuth.php                         php artsion model:create member_auth --ignore');
+        $this->info('   创建Models/MemberAuth.php并且继承laravel的model   php artsion model:create member_auth --ignore --extend=laravel');
+        $this->info('   创建Models/MemberAuth.php并且继承laravel的model   php artsion model:create member_auth --ignore -E laravel');
+    }
+
     public function handle()
     {
         $name = $this->argument('name');
@@ -51,6 +60,7 @@ class MakeModel extends Command
 
         if (empty($name)) {
             $this->error('请输入要创建的表名称');
+            $this->help();
             exit(1);
         }
 
@@ -85,8 +95,8 @@ class MakeModel extends Command
         if (empty($attrs)) {
             $this->error('没有检测到表字段信息，请检查表名称');
             $this->info('请注意：');
-            $this->info('      y结尾会转化成ies，不');
-            $this->info('      不是以s结果的会追加上s');
+            $this->info('   y结尾会转化成ies，不');
+            $this->info('   不是以s结果的会追加上s');
             exit(1);
         }
 
@@ -101,8 +111,8 @@ class MakeModel extends Command
         }
         $fillable .= "]";
 
-        $call = function () use ($name, $dir) {
-            $this->call('model:property', ['name' => $name, '--dir' => $dir]);
+        $call = function () use ($name) {
+            $this->call('model:property', ['name' => $name]);
         };
 
         if (is_file($filename)) {
@@ -134,7 +144,7 @@ EOF;
 
         file_put_contents($filename, $content);
 
-        $this->info('make successful');
+        $this->info('make model successful');
 
         $call();
     }

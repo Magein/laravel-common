@@ -10,21 +10,11 @@ class MakeModelProperty extends Command
 {
     /**
      *
-     * Models目录下的所有文件，没有声明的都重新property
-     * php artisan model:property
-     *
-     * Models\User.php的文件生成property
-     * php artisan model:property user
-     *
-     * Models\Member\*.php的文件生成property,参数会转化为pascal格式
-     * php artisan model:property --dir=member
-     * php artisan model:property -D member
-     *
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'model:property {name?} {--D|--dir=}';
+    protected $signature = 'model:property {name?}';
 
     /**
      * The console command description.
@@ -43,6 +33,14 @@ class MakeModelProperty extends Command
         parent::__construct();
     }
 
+    private function help()
+    {
+        $this->comment('请参考以下示列：');
+        $this->info('  识别Models/User.php的命令             php artisan model:property user');
+        $this->info('  识别Models/User/*.php的命令           php artisan model:property user_');
+        $this->info('  识别Models/User/UserAction.php的命令  php artisan model:property user_action');
+    }
+
     /**
      * Execute the console command.
      *
@@ -51,76 +49,95 @@ class MakeModelProperty extends Command
     public function handle()
     {
         $name = $this->argument('name');
-        $dir = $this->option('dir');
 
         if (empty($name)) {
-            $this->error('请输入生成property的模型名称');
+            $this->help();
+            exit(1);
         }
 
-        $name = Variable::instance()->pascal($name);
-
-        if (!$dir) {
-            $files = glob('./app/Models/*.php');
+        if (preg_match('/_/', $name)) {
+            $options = explode('_', $name);
         } else {
-            $dir = trim($dir, '/');
-            $dir = Variable::instance()->pascal($dir);
-            $files = glob("./app/Models/$dir/*.php");
+            $options = explode('_', $name);
         }
 
-        $make = [];
-        if ($files) {
-            foreach ($files as $path) {
-                $content = file_get_contents($path);
-                $filename = pathinfo($path, PATHINFO_FILENAME);
-
-                if ($filename === 'BaseModel') {
-                    continue;
-                }
-
-                $namespace = preg_replace(['/\.\/app/', '/\.php/', '/\//'], ['App', '', '\\\\'], $path);
-                if (preg_match('/\* @property/', $content) && empty($name)) {
-                    continue;
-                }
-
-                if ($name && $filename != $name) {
-                    continue;
-                }
-
-                $model = new $namespace();
-                $attrs = Schema::getColumnListing($model->getTable());
-
-                $property = '/**';
-                $property .= "\n";
-
-                if ($attrs) {
-                    foreach ($attrs as $item) {
-                        if (in_array($item, ['id', 'created_at', 'updated_at', 'deleted_at'])) {
-                            continue;
-                        }
-                        $type = 'string';
-                        if (preg_match('/id/', $item)) {
-                            $type = 'integer';
-                        }
-                        $property .= " * @property $type $" . $item;
-                        $property .= "\n";
-                    }
-                }
-                $property .= " */";
-
-                // 替换属性
-                $content = preg_replace("/class $filename/", $property . "\n" . "class $filename", $content);
-
-                file_put_contents($path, $content);
-
-                $this->info('success:' . $path);
-
-                $make[] = $path;
+        if (count($options) == 1) {
+            $filename = Variable::instance()->pascal($name);
+            $files = glob("./app/Models/$filename.php");
+        } else {
+            $dir = $options[0] ?? '';
+            $dir = Variable::instance()->pascal($dir);
+            $filename = $options[1] ?? '';
+            if (empty($filename)) {
+                $files = glob("./app/Models/$dir/*.php");
+            } else {
+                $filename = Variable::instance()->pascal($filename);
+                $files = glob("./app/Models/{$dir}/{$dir}{$filename}.php");
             }
         }
 
-        if (empty($make)) {
-            $this->info('Empty ! You can enter the name  parameter to enforce');
-            $this->info('or remove Models\wantmake.php property');
+        if (empty($files)) {
+            $this->error('没有加载到文件信息，请检查参数');
+            $this->help();
+            exit();
         }
+
+        foreach ($files as $path) {
+            $content = file_get_contents($path);
+            $namespace = preg_replace(['/\.\/app/', '/\.php/', '/\//'], ['App', '', '\\\\'], $path);
+            if (preg_match('/\* @property/', $content)) {
+                $this->comment('continue file : ' . $path);
+                continue;
+            }
+            $model = new $namespace();
+            $attrs = Schema::getColumnListing($model->getTable());
+
+            $property = '/**';
+            $property .= "\n";
+
+            $methods = '';
+            $methods .= "\n";
+            $method_params = function ($prefix, $name, $param) {
+                if ($prefix == '__') {
+                    $name = '\Illuminate\Database\Eloquent\Collection';
+                } elseif ($prefix == '___') {
+                    $name = '\Illuminate\Pagination\LengthAwarePaginator';
+                }
+                return '* @method static ' . $name . '|null ' . $prefix . Variable::instance()->camelCase($param) . '($' . $param . ');' . "\n";
+            };
+
+            if ($attrs) {
+                foreach ($attrs as $item) {
+                    if (in_array($item, ['id', 'created_at', 'updated_at', 'deleted_at'])) {
+                        continue;
+                    }
+                    $type = 'string';
+                    if (preg_match('/id/', $item)) {
+                        $type = 'integer';
+                    }
+                    $property .= " * @property $type $" . $item;
+                    $property .= "\n";
+
+                    if (preg_match('/_id|_no|phone|email$/', $item)) {
+                        $methods .= $method_params('_', $name, $item);
+                        $methods .= $method_params('__', $name, $item);
+                        $methods .= $method_params('___', $name, $item);
+                    }
+                }
+            }
+
+            if (preg_match('/extends BaseModel/', $content)) {
+                $property .= $methods;
+            }
+
+            $property .= " */";
+
+            // 替换属性
+            $filename = pathinfo($path, PATHINFO_FILENAME);
+            $content = preg_replace("/class $filename/", $property . "\n" . "class $filename", $content);
+            file_put_contents($path, $content);
+            $this->info('success file: ' . $path);
+        }
+
     }
 }
