@@ -122,7 +122,7 @@ class MakeModel extends Command
         }
 
         $extends = 'BaseModel';
-        $extends_use = 'use App\Models\BaseModel;';
+        $extends_use = 'use Magein\Common\BaseModel;';
 
         if ($extend === 'laravel') {
             $extends = 'Model';

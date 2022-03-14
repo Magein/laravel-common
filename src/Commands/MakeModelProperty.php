@@ -102,6 +102,8 @@ class MakeModelProperty extends Command
                     $name = '\Illuminate\Database\Eloquent\Collection';
                 } elseif ($prefix == '___') {
                     $name = '\Illuminate\Pagination\LengthAwarePaginator';
+                } else {
+                    $name = Variable::instance()->pascal($name);
                 }
                 return '* @method static ' . $name . '|null ' . $prefix . Variable::instance()->camelCase($param) . '($' . $param . ');' . "\n";
             };
