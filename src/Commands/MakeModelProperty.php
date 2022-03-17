@@ -55,11 +55,13 @@ class MakeModelProperty extends Command
             exit(1);
         }
 
+
         if (preg_match('/_/', $name)) {
             $options = explode('_', $name);
         } else {
             $options = explode('_', $name);
         }
+
 
         if (count($options) == 1) {
             $filename = Variable::instance()->pascal($name);
@@ -71,8 +73,8 @@ class MakeModelProperty extends Command
             if (empty($filename)) {
                 $files = glob("./app/Models/$dir/*.php");
             } else {
-                $filename = Variable::instance()->pascal($filename);
-                $files = glob("./app/Models/{$dir}/{$dir}{$filename}.php");
+                $filename = Variable::instance()->pascal($name);
+                $files = glob("./app/Models/{$dir}/{$filename}.php");
             }
         }
 
