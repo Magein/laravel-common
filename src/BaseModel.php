@@ -18,6 +18,7 @@ use magein\tools\common\Variable;
  * @method static whereBetween($column, $value)
  * @method static whereIn($column, $value)
  * @method static find($primary_key)
+ * @method static pluck($field, $key = '')
  */
 class BaseModel extends Model
 {
@@ -30,8 +31,8 @@ class BaseModel extends Model
      */
     public static function __callStatic($name, $arguments)
     {
-        $underline = strripos($name, '_');
-        if ($underline >= 0) {
+        if (preg_match('/^_/', $name)) {
+            $underline = strripos($name, '_');
             $field = substr($name, $underline + 1);
             if (empty($field) || empty($arguments)) {
                 return null;
