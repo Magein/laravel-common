@@ -30,6 +30,8 @@ class UploadData
      */
     private string $save_path = '';
 
+    private $call = null;
+
     /**
      * @param string $save_path
      * @param string|array $extend
@@ -134,5 +136,17 @@ class UploadData
         }
 
         $this->save_path = $save_path;
+    }
+
+    public function setCall($call)
+    {
+        $this->call = $call;
+    }
+
+    public function complete($data)
+    {
+        if (is_callable($this->call)) {
+            call_user_func($this->call, $data);
+        }
     }
 }

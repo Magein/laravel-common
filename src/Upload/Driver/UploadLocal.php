@@ -106,9 +106,13 @@ class UploadLocal
             return MsgContainer::msg('上传出现错误');
         };
 
-        return [
+        $data = [
             'filepath' => $save_path,
             'url' => AssetPath::getVisitPath($save_path)
         ];
+
+        $uploadData->complete($data);
+
+        return $data;
     }
 }
