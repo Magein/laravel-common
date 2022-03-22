@@ -55,15 +55,15 @@ class UploadData
             $filepath = 'image';
             $extend = self::IMAGE;
             $size = 512;
-        } elseif (preg_match('/audio/', $mime)) {
-            $type = 2;
-            $filepath = 'audio';
-            $extend = self::AUDIO;
-            $size = 1024 * 6;
         } elseif (preg_match('/video/', $mime)) {
-            $type = 3;
+            $type = 2;
             $filepath = 'video';
             $extend = self::VIDEO;
+            $size = 1024 * 6;
+        } elseif (preg_match('/audio/', $mime)) {
+            $type = 3;
+            $filepath = 'audio';
+            $extend = self::AUDIO;
             $size = 1024 * 6;
         } else {
             $filepath = 'file';
