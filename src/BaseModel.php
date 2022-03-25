@@ -180,21 +180,4 @@ class BaseModel extends Model
 
         return $data[$sex] ?? '保密';
     }
-
-    /**
-     * 这里是回填使用的值，
-     * @return array
-     */
-    public function getRegionAttribute(): array
-    {
-        $province_id = $this->attributes['province_id'] ?? '';
-        $city_id = $this->attributes['city_id'] ?? '';
-        $area_id = $this->attributes['area_id'] ?? '';
-
-        return [
-            intval($province_id),
-            intval($city_id),
-            intval($area_id)
-        ];
-    }
 }
