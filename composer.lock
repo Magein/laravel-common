@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "68d450a5b91a4159b620065bc4d80784",
+    "content-hash": "c5c6d47689ae3a4a7899c0f134fd7a34",
     "packages": [
         {
             "name": "brick/math",
@@ -1073,6 +1073,48 @@
                 }
             ],
             "time": "2021-11-21T11:48:40+00:00"
+        },
+        {
+            "name": "magein/tools",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Magein/tools.git",
+                "reference": "73ef3c1b1ff2408c5ed9b7c19fc71809ff1d70a7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Magein/tools/zipball/73ef3c1b1ff2408c5ed9b7c19fc71809ff1d70a7",
+                "reference": "73ef3c1b1ff2408c5ed9b7c19fc71809ff1d70a7",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "magein\\tools\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "xiaomage",
+                    "email": "1154699897@qq.com"
+                }
+            ],
+            "description": "开发中常用的php工具类",
+            "homepage": "https://github.com/magein/tools",
+            "support": {
+                "issues": "https://github.com/Magein/tools/issues",
+                "source": "https://github.com/Magein/tools/tree/master"
+            },
+            "time": "2022-03-01T09:21:47+00:00"
         },
         {
             "name": "monolog/monolog",
@@ -4737,11 +4779,13 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "magein/tools": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^7.3|^8.0",
+        "php": "^7.4|^8.0",
         "ext-json": "*"
     },
     "platform-dev": [],

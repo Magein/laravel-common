@@ -12,14 +12,14 @@ class MakeModel extends Command
      * 创建的模型会默认继承 BaseModel 可以使用 --extend=laravel
      *
      * 下面命令会创建Models/Member/MemberAuth.php
-     * php artsion model:create member_auth
+     * php artisan model:create member_auth
      *
      * 下面命令会创建Models/MemberAuth.php
-     * php artsion model:create member_auth --ignore
+     * php artisan model:create member_auth --ignore
      *
      * 下面命令会创建Models/MemberAuth.php并且继承laravel的model
-     * php artsion model:create member_auth --ignore --extend=laravel
-     * php artsion model:create member_auth --ignore -E laravel
+     * php artisan model:create member_auth --ignore --extend=laravel
+     * php artisan model:create member_auth --ignore -E laravel
      *
      *
      * @var string
