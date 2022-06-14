@@ -5,14 +5,14 @@ namespace Magein\Common;
 class BaseService
 {
     /**
-     * @var BaseService
+     * @var BaseService|null
      */
-    protected static BaseService $instance;
+    protected static ?BaseService $instance = null;
 
     protected ?Message $message = null;
 
     /**
-     * @return static
+     * @return \Magein\Common\BaseService
      */
     public static function instance(): BaseService
     {
