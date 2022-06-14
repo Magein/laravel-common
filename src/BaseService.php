@@ -9,24 +9,47 @@ class BaseService
      */
     protected static BaseService $instance;
 
+    protected ?Message $message = null;
+
     /**
      * @return static
      */
-    public static function instance(): ?BaseService
+    public static function instance(): BaseService
     {
-        self::$instance = new static();
-
+        if (self::$instance === null) {
+            self::$instance = new static();
+        }
         return self::$instance;
     }
 
     /**
-     * @param string $message
-     * @param int $code
-     * @param mixed $data
-     * @return MsgContainer
+     *
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
      */
-    public function error(string $message, int $code = 1, $data = null): MsgContainer
+    public function response($data = null)
     {
-        return new MsgContainer($message, $code, $data);
+        if ($data) {
+            return ApiResponse::success($data);
+        }
+
+        $message = $this->message;
+        if (empty($data) || $message) {
+            return ApiResponse::data($message->getCode(), $message->getMessage(), $message->getData());
+        }
+
+        return ApiResponse::success();
+    }
+
+    /**
+     * @param string $error
+     * @param string|int $code
+     * @param $data
+     * @return bool
+     */
+    public function error(string $error, $code = ApiCode::ERROR, $data = null): bool
+    {
+        $this->message = new Message($error, $code, $data);
+
+        return false;
     }
 }

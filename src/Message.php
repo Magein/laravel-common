@@ -2,7 +2,7 @@
 
 namespace Magein\Common;
 
-class MsgContainer
+class Message
 {
     /**
      * @var string
@@ -89,16 +89,5 @@ class MsgContainer
     public function setData($data): void
     {
         $this->data = $data;
-    }
-
-    /**
-     * @param string $message
-     * @param int $code
-     * @param null $data
-     * @return MsgContainer
-     */
-    public static function msg(string $message, int $code = ApiCode::ERROR, $data = null)
-    {
-        return new self($message, $code, $data);
     }
 }

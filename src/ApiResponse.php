@@ -67,7 +67,7 @@ class ApiResponse
     {
         if ($result === false) {
             return self::error('');
-        } elseif ($result instanceof MsgContainer) {
+        } elseif ($result instanceof Message) {
             return self::data($result->getCode(), $result->getMessage(), $result->getData());
         }
         return self::success($result, 'success');
