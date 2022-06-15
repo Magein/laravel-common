@@ -2,45 +2,37 @@
 
 namespace Magein\Common;
 
-class Message
+/**
+ * @method static success($content = null, $message = '', $code = 0)
+ * @method static error($message = '', $code = 1, $content = null)
+ */
+class Output
 {
     /**
      * @var string
      */
-    private string $message;
+    protected string $message = '';
 
     /**
      * @var int
      */
-    private int $code;
+    protected int $code = 0;
 
     /**
-     * @var mixed|null
+     * @var mixed
      */
-    private $data;
+    protected $content = null;
 
     /**
      * @param string $message
      * @param int $code
-     * @param null $data
+     * @param mixed $content
      */
-    public function __construct(string $message = '', int $code = ApiCode::SUCCESS, $data = null)
+    public function __construct(string $message = '', int $code = ApiCode::SUCCESS, $content = null)
     {
         $this->message = $message;
         $this->code = $code;
-        $this->data = $data;
-    }
-
-    /**
-     * @return array
-     */
-    public function get(): array
-    {
-        return [
-            'message' => $this->message,
-            'code' => $this->code,
-            'data' => $this->data,
-        ];
+        $this->content = $content;
     }
 
     /**
@@ -76,18 +68,18 @@ class Message
     }
 
     /**
-     * @return mixed|null
+     * @return mixed
      */
-    public function getData()
+    public function getContent()
     {
-        return $this->data;
+        return $this->content;
     }
 
     /**
-     * @param mixed|null $data
+     * @param mixed $content
      */
-    public function setData($data): void
+    public function setContent($content): void
     {
-        $this->data = $data;
+        $this->content = $content;
     }
 }

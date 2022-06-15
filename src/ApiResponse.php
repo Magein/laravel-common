@@ -60,16 +60,16 @@ class ApiResponse
     }
 
     /**
-     * @param $result
+     * @param $output
      * @return Response|ResponseFactory
      */
-    public static function auto($result)
+    public static function auto($output)
     {
-        if ($result === false) {
+        if ($output === false) {
             return self::error('');
-        } elseif ($result instanceof Message) {
-            return self::data($result->getCode(), $result->getMessage(), $result->getData());
+        } elseif ($output instanceof Output) {
+            return self::data($output->getCode(), $output->getMessage(), $output->getContent());
         }
-        return self::success($result, 'success');
+        return self::success($output, 'success');
     }
 }
