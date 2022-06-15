@@ -2,20 +2,17 @@
 
 namespace Magein\Common;
 
-class BaseService
+trait BaseService
 {
     /**
-     * @var BaseService|null
+     * @var null
      */
-    protected static ?BaseService $instance = null;
+    protected static $instance = null;
 
-    /**
-     * @return \Magein\Common\BaseService
-     */
-    public static function instance(): BaseService
+    public static function instance(): self
     {
         if (self::$instance === null) {
-            self::$instance = new static();
+            self::$instance = new self();
         }
         return self::$instance;
     }
