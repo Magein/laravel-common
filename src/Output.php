@@ -28,7 +28,7 @@ class Output
      * @param int $code
      * @param mixed $content
      */
-    public function __construct(string $message = '', int $code = ApiCode::SUCCESS, $content = null)
+    public function __construct(string $message = '', int $code = ApiCode::ERROR, $content = null)
     {
         $this->message = $message;
         $this->code = $code;
