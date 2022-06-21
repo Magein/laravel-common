@@ -17,18 +17,20 @@ class Output
     /**
      * @var mixed
      */
-    protected $content = null;
+    protected $data = null;
 
     /**
-     * @param string $message
-     * @param int $code
-     * @param mixed $content
+     * @param mixed $data
      */
-    public function __construct(string $message = '', int $code = ApiCode::ERROR, $content = null)
+    public function __construct($data = '')
     {
-        $this->message = $message;
-        $this->code = $code;
-        $this->content = $content;
+        if (is_string($data)) {
+            $this->code = ApiCode::ERROR;
+            $this->message = $data;
+        } else {
+            $this->code = ApiCode::SUCCESS;
+            $this->data = $data;
+        }
     }
 
     /**
@@ -66,29 +68,29 @@ class Output
     /**
      * @return mixed
      */
-    public function getContent()
+    public function getData()
     {
-        return $this->content;
+        return $this->data;
     }
 
     /**
-     * @param mixed $content
+     * @param mixed $data
      */
-    public function setContent($content): void
+    public function setData($data): void
     {
-        $this->content = $content;
+        $this->data = $data;
     }
 
     /**
-     * @param mixed $content
+     * @param mixed $data
      * @param string $message
      * @return \Magein\Common\Output
      */
-    public static function success($content = null, string $message = ''): Output
+    public static function success($data = null, string $message = ''): Output
     {
         $instance = new self();
         $instance->setCode(ApiCode::SUCCESS);
-        $instance->setContent($content);
+        $instance->setData($data);
         $instance->setMessage($message);
 
         return $instance;
@@ -96,14 +98,14 @@ class Output
 
     /**
      * @param string $message
-     * @param mixed $content
+     * @param mixed $data
      * @return \Magein\Common\Output
      */
-    public static function error(string $message, $content = null): Output
+    public static function error(string $message, $data = null): Output
     {
         $instance = new self();
         $instance->setCode(ApiCode::ERROR);
-        $instance->setContent($content);
+        $instance->setData($data);
         $instance->setMessage($message);
 
         return $instance;
