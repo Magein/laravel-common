@@ -98,13 +98,14 @@ class Output
 
     /**
      * @param string $message
+     * @param int $code
      * @param mixed $data
      * @return \Magein\Common\Output
      */
-    public static function error(string $message, $data = null): Output
+    public static function error(string $message, int $code = ApiCode::ERROR, $data = null): Output
     {
         $instance = new self();
-        $instance->setCode(ApiCode::ERROR);
+        $instance->setCode($code);
         $instance->setData($data);
         $instance->setMessage($message);
 
