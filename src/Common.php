@@ -1,7 +1,10 @@
 <?php
 
 if (!function_exists('isLocal')) {
-    function isLocal()
+    /**
+     * @return bool
+     */
+    function isLocal(): bool
     {
         if (app()->environment() == 'local') {
             return true;
@@ -11,7 +14,12 @@ if (!function_exists('isLocal')) {
 }
 
 if (!function_exists('slog')) {
-    function slog($message, $data = '')
+    /**
+     * @param $message
+     * @param string|array $data
+     * @return bool
+     */
+    function slog($message, $data = ''): bool
     {
         if ($message && empty($data)) {
             $data = [$message];
