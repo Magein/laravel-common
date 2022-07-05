@@ -16,4 +16,11 @@ trait BaseService
         }
         return self::$instance;
     }
+
+    public static function error($message, $code = ApiCode::ERROR, $data = null)
+    {
+        abort(ApiResponse::data($code, $message, $data));
+
+        return false;
+    }
 }
