@@ -5,6 +5,7 @@ namespace Magein\Common\Providers;
 use Illuminate\Support\ServiceProvider;
 use Magein\Common\Commands\MakeModel;
 use Magein\Common\Commands\MakeModelProperty;
+use Magein\Common\Commands\MakeModelValidator;
 
 /**
  * 参考地址 https://learnku.com/laravel/t/35930
@@ -38,7 +39,8 @@ class HelperServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 MakeModel::class,
-                MakeModelProperty::class
+                MakeModelProperty::class,
+                MakeModelValidator::class,
             ]);
         }
     }
