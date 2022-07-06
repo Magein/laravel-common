@@ -46,10 +46,10 @@ class MakeModel extends Command
     private function help()
     {
         $this->comment('请参考以下示列');
-        $this->info('   创建Models/Member/MemberAuth.php                  php artsion model:create member_auth');
-        $this->info('   创建Models/MemberAuth.php                         php artsion model:create member_auth --ignore');
-        $this->info('   创建Models/MemberAuth.php并且继承laravel的model   php artsion model:create member_auth --ignore --extend=laravel');
-        $this->info('   创建Models/MemberAuth.php并且继承laravel的model   php artsion model:create member_auth --ignore -E laravel');
+        $this->info('   创建Models/Member/MemberAuth.php                  php artisan model:create member_auth');
+        $this->info('   创建Models/MemberAuth.php                         php artisan model:create member_auth --ignore');
+        $this->info('   创建Models/MemberAuth.php并且继承laravel的model   php artisan model:create member_auth --ignore --extend=laravel');
+        $this->info('   创建Models/MemberAuth.php并且继承laravel的model   php artisan model:create member_auth --ignore -E laravel');
     }
 
     public function handle()

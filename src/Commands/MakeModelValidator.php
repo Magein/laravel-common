@@ -21,7 +21,7 @@ class MakeModelValidator extends Command
 
     private function help()
     {
-        $this->comment('说明：');
+        $this->comment('usage：');
         $this->info('   为否允许为空判断依据：是否有默认值 有默认值则可以为空');
         $this->info('   类型判断依据：int、tinyint、类型对应int类型 varchar、char、text对应string类型 date类型对应date类型');
         $this->info('   长度验证：string类型的会验证长度(非中文验证)');
