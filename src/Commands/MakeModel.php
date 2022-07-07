@@ -3,6 +3,8 @@
 namespace Magein\Common\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use magein\tools\common\Variable;
 
@@ -24,14 +26,25 @@ class MakeModel extends Command
      *
      * @var string
      */
-    protected $signature = 'model:create {name?} {--ignore} {--E|extend=}';
+    protected $signature = 'model:create {name?} {--ignore} {--E|extend=} {--R|request}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = '创建模型类 当使用下划线的时候，会创建二级目录 --ng 不创建二级目录';
+    protected $description = '创建model类 表名称请使用完成的表名称，如members、companies。
+ 当使用下划线的时候默认会创建二级目录，可以指定--ignore参数取消创建二级目录
+ model类默认继承BaseModel，可以指定--extend=laravel继承laravel的EloquentModel
+ ';
+
+    public $help = 'Usage example:
+    php artisan model:create companies                  创建Models/Member/Company.php
+    php artisan model:create member_auths               创建Models/Member/MemberAuth.php
+    php artisan model:create member_auths --ignore      创建Models/MemberAuth.php
+    php artisan model:create member_auths --ignore --extend=laravel     创建Models/MemberAuth.php并且继承laravel的model
+    php artisan model:create member_auth --ignore -E laravel            创建Models/MemberAuth.php并且继承laravel的model
+';
 
     /**
      * Create a new command instance.
@@ -43,24 +56,30 @@ class MakeModel extends Command
         parent::__construct();
     }
 
-    private function help()
-    {
-        $this->comment('请参考以下示列');
-        $this->info('   创建Models/Member/MemberAuth.php                  php artisan model:create member_auth');
-        $this->info('   创建Models/MemberAuth.php                         php artisan model:create member_auth --ignore');
-        $this->info('   创建Models/MemberAuth.php并且继承laravel的model   php artisan model:create member_auth --ignore --extend=laravel');
-        $this->info('   创建Models/MemberAuth.php并且继承laravel的model   php artisan model:create member_auth --ignore -E laravel');
-    }
-
     public function handle()
     {
         $name = $this->argument('name');
         $ignore = $this->option('ignore');
         $extend = $this->option('extend');
+        $request = $this->option('request');
 
         if (empty($name)) {
-            $this->error('请输入要创建的表名称');
-            $this->help();
+            $this->info($this->getHelp());
+            exit(1);
+        }
+
+        $class_name = $name;
+        if (preg_match('/ies$/', $class_name)) {
+            $class_name = preg_replace('/ies$/', 'y', $class_name);
+        } elseif (preg_match('/s$/', $class_name)) {
+            $class_name = substr($class_name, 0, -1);
+        }
+
+        try {
+            $attrs = DB::select("show full columns from $name");
+        } catch (QueryException $queryException) {
+            $this->error('没有检测到表字段信息，请检查表名称');
+            $this->info($this->getHelp());
             exit(1);
         }
 
@@ -81,38 +100,35 @@ class MakeModel extends Command
             $path = './app/Models';
         }
 
-        $class_name = Variable::instance()->pascal($name);
+        $class_name = $name;
+        if (preg_match('/ies$/', $class_name)) {
+            $class_name = preg_replace('/ies$/', 'y', $class_name);
+        } elseif (preg_match('/s$/', $class_name)) {
+            $class_name = substr($class_name, 0, -1);
+        }
+
+        $class_name = Variable::instance()->pascal($class_name);
         $filename = $path . '/' . $class_name . '.php';
-
-        if (preg_match('/y$/', $name)) {
-            $attrs = Schema::getColumnListing(preg_replace('/y$/', 'ies', $name));
-        } elseif (!preg_match('/s$/', $name)) {
-            $attrs = Schema::getColumnListing($name . 's');
-        } else {
-            $attrs = Schema::getColumnListing($name);
-        }
-
-        if (empty($attrs)) {
-            $this->error('没有检测到表字段信息，请检查表名称');
-            $this->info('请注意：');
-            $this->info('   y结尾会转化成ies，不');
-            $this->info('   不是以s结果的会追加上s');
-            exit(1);
-        }
 
         $fillable = "[\n";
         if ($attrs) {
             foreach ($attrs as $attr) {
-                if (in_array($attr, ['id', 'money', 'balance', 'score', 'integral', 'created_at', 'updated_at', 'deleted_at'])) {
+
+                $field = $attr->Field;
+
+                if (in_array($field, ['id', 'money', 'balance', 'score', 'integral', 'created_at', 'updated_at', 'deleted_at'])) {
                     continue;
                 }
-                $fillable .= "      '$attr',\n";
+                $fillable .= "      '$field',\n";
             }
         }
         $fillable .= "]";
 
-        $call = function () use ($name) {
+        $call = function () use ($name, $request) {
             $this->call('model:property', ['name' => $name]);
+            if ($request) {
+                $this->call('model:validate', ['name' => $name]);
+            }
         };
 
         if (is_file($filename)) {

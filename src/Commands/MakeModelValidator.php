@@ -101,28 +101,39 @@ Usage：
                 $messages["$field.integer"] = "{$comment}只能是整数";
 
                 $rule[] = 'in:0,1';
-                $messages["$field.in"] = "{$comment}值错误";
+                $messages["$field.in"] = "{$comment}选项值错误";
 
             } elseif (preg_match('/int/', $type)) {
                 $rule[] = 'integer';
+                $messages["$field.integer"] = "{$comment}只能是整数";
+
             } elseif (preg_match('/decimal/', $type)) {
                 $rule[] = 'numeric';
+                $messages["$field.integer"] = "{$comment}需要一个数字类型";
+
             } elseif (preg_match('/^char/', $type)) {
                 $rule [] = "string";
+                $messages["$field.string"] = "{$comment}是一个字符串";
+
                 preg_match('/[0-9]+/', $type, $matches);
                 $size = $matches[0] ?? '';
                 if ($size) {
                     $rule[] = "size:$size";
+                    $messages["$field.size"] = "{$comment}是一个长度为{$size}的字符串";
                 }
             } elseif (preg_match('/^varchar/', $type)) {
                 $rule [] = "string";
+                $messages["$field.string"] = "{$comment}是一个字符串";
+
                 preg_match('/[0-9]+/', $type, $matches);
                 $size = $matches[0] ?? 0;
                 if ($size) {
                     $rule[] = "between:0,$size";
+                    $messages["$field.between"] = "{$comment}是最大长度为{$size}";
                 }
             } elseif (in_array($type, ['timestamp', 'datetime'])) {
                 $rule [] = "date";
+                $messages["$field.date"] = "{$comment}需要时间类型的字符串";
             }
 
             /**
@@ -131,24 +142,32 @@ Usage：
             switch ($field) {
                 case 'email':
                     $rule [] = 'email';
+                    $messages["$field.email"] = "邮箱格式错误";
                     break;
                 case 'phone':
                     $rule [] = 'regex:/^1\d{10}/';
+                    $messages["$field.regex"] = "手机号码格式错误";
                     break;
                 case 'password':
                     $rule [] = 'alpha_dash';
+                    $messages["$field.alpha_dash"] = "密码格式为数字字母下划线";
+
                     $rule [] = 'between:6,18';
+                    $messages["$field.between"] = "密码长度为6~18位";
                     break;
                 case 'sex':
                 case 'gender':
                     $rule [] = 'in:0,1,2';
+                    $messages["$field.in"] = "性别参数错误";
                     break;
                 case 'age':
                     $rule [] = 'between:0,130';
+                    $messages["$field.between"] = "年龄范围错误";
                     break;
                 case 'id_card':
                 case 'id_number':
                     $rule [] = 'regex:/^\d{17}.{1}/';
+                    $messages["$field.regex"] = "身份证格式错误";
                     break;
                 case 'logo':
                 case 'avatar':
@@ -160,18 +179,35 @@ Usage：
                 case 'picture':
                 case 'bg':
                     $rule [] = 'image';
+                    $messages["$field.image"] = "{$comment}不是一个图片地址";
                     break;
                 case 'start_time':
                 case 'begin_time':
                     $rule [] = 'date';
+                    $messages["$field.date"] = "开始时间需要一个时间格式的字符串";
+                    break;
                 case 'end_time':
+                case 'finish_time':
                     $rule [] = 'date';
+                    $messages["$field.date"] = "结束时间需要一个时间格式的字符串";
+
                     $rule [] = 'after:start_time';
+                    $messages["$field.after"] = "结束时间需要一个时间格式的字符串";
+                    break;
+                case 'complete_time':
+                    $rule [] = 'date';
+                    $messages["$field.date"] = "完成时间需要一个时间格式的字符串";
+                    break;
+                case 'verify_time':
+                    $rule [] = 'date';
+                    $messages["$field.date"] = "审核时间需要一个时间格式的字符串";
+                    break;
             }
 
             // 订单编号、商品编号等验证
             if (preg_match('/_no$/', $field)) {
                 $rule [] = 'alpha_num';
+                $messages["$field.alpha_num"] = "{$comment}格式错误";
             }
 
             $rule = array_unique($rule);
@@ -182,6 +218,11 @@ Usage：
         $rules_str = "\n";
         foreach ($rules as $field => $rule) {
             $rules_str .= "            '$field' => '$rule',\n";
+        }
+
+        $messages_str = "\n";
+        foreach ($messages as $field => $message) {
+            $messages_str .= "            '$field' => '$message',\n";
         }
 
         // 保存的路径
@@ -212,6 +253,7 @@ Usage：
 
         $filename = "{$save_path}/{$class_name}.php";
         $rules_str = rtrim($rules_str, "\n");
+        $messages_str = rtrim($messages_str, "\n");
 
         $content = <<<EOF
 <?php
@@ -233,6 +275,15 @@ class {$class_name} extends FormRequest
     public function rules():array
     {
         return [$rules_str
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function messages(): array
+    {
+        return [$messages_str
         ];
     }
 }
