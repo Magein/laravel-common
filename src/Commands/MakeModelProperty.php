@@ -3,7 +3,8 @@
 namespace Magein\Common\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use magein\tools\common\Variable;
 
 class MakeModelProperty extends Command
@@ -14,7 +15,7 @@ class MakeModelProperty extends Command
      *
      * @var string
      */
-    protected $signature = 'model:property {name?}';
+    protected $signature = 'model:property {name?} {--ignore}';
 
     /**
      * The console command description.
@@ -22,6 +23,17 @@ class MakeModelProperty extends Command
      * @var string
      */
     protected $description = 'Models目录下的模型类类都追加上@property 属性名称';
+
+    protected $help = "Notice：
+    参数是数据库的表名称，需要写完整的、正确的表名称
+Usage：
+    php artisan model:property users        识别Models/User.php文件
+    php artisan model:property user*       识别Models/User/*.php文件
+    php artisan model:property companies    识别Models/Company.php文件
+    php artisan model:property company*   识别Models/Company/*.php文件
+    php artisan model:property user_orders  识别Models/User/Order.php文件
+    php artisan model:property user_orders --ignore  识别Models/UserOrder.php文件
+";
 
     /**
      * Create a new command instance.
@@ -35,10 +47,8 @@ class MakeModelProperty extends Command
 
     private function help()
     {
-        $this->comment('请参考以下示列：');
-        $this->info('  识别Models/User.php的命令             php artisan model:property user');
-        $this->info('  识别Models/User/*.php的命令           php artisan model:property user_');
-        $this->info('  识别Models/User/UserAction.php的命令  php artisan model:property user_action');
+        $this->info($this->getHelp());
+        die();
     }
 
     /**
@@ -49,32 +59,35 @@ class MakeModelProperty extends Command
     public function handle()
     {
         $name = $this->argument('name');
+        $ignore = $this->option('ignore');
 
         if (empty($name)) {
             $this->help();
-            exit(1);
         }
 
+        $files = [];
 
-        if (preg_match('/_/', $name)) {
-            $options = explode('_', $name);
+        //匹配以*结束的通配符
+        if (preg_match('/\*$/', $name)) {
+            $dir = Variable::instance()->pascal(substr($name, 0, -1));
+            $files = glob("./app/Models/$dir/*.php");
         } else {
-            $options = explode('_', $name);
-        }
-
-
-        if (count($options) == 1) {
-            $filename = Variable::instance()->pascal($name);
-            $files = glob("./app/Models/$filename.php");
-        } else {
-            $dir = $options[0] ?? '';
-            $dir = Variable::instance()->pascal($dir);
-            $filename = $options[1] ?? '';
-            if (empty($filename)) {
-                $files = glob("./app/Models/$dir/*.php");
+            $class_name = $name;
+            if (preg_match('/ies$/', $class_name)) {
+                $class_name = preg_replace('/ies$/', 'y', $class_name);
+            } elseif (preg_match('/s$/', $class_name)) {
+                $class_name = substr($class_name, 0, -1);
+            }
+            $class_name = Variable::instance()->pascal($class_name);
+            if ($ignore) {
+                $files = glob("./app/Models/$class_name.php");
             } else {
-                $filename = Variable::instance()->pascal($name);
-                $files = glob("./app/Models/{$dir}/{$filename}.php");
+                $options = explode('_', $name);
+                $dir = $options[0] ?? '';
+                if ($dir) {
+                    $dir = Variable::instance()->pascal($dir);
+                    $files = glob("./app/Models/{$dir}/{$class_name}.php");
+                }
             }
         }
 
@@ -91,8 +104,18 @@ class MakeModelProperty extends Command
                 $this->comment('continue file : ' . $path);
                 continue;
             }
+
+            $cla_name = pathinfo($path, PATHINFO_FILENAME);
+
             $model = new $namespace();
-            $attrs = Schema::getColumnListing($model->getTable());
+            $table_name = $model->getTable();
+            try {
+                $attrs = DB::select("show full columns from $table_name");
+            } catch (QueryException $queryException) {
+                $this->error("没有检测到{$table_name}表字段信息，请检查表名称");
+                $this->help();
+                exit(1);
+            }
 
             $property = '/**';
             $property .= "\n";
@@ -111,21 +134,33 @@ class MakeModelProperty extends Command
             };
 
             if ($attrs) {
-                foreach ($attrs as $item) {
-                    if (in_array($item, ['id', 'created_at', 'updated_at', 'deleted_at'])) {
+                foreach ($attrs as $attr) {
+
+                    $field = $attr->Field;
+                    $type = $attr->Type;
+                    $key = $attr->Key;
+
+                    if (in_array($field, ['id', 'created_at', 'updated_at', 'deleted_at'])) {
                         continue;
                     }
-                    $type = 'string';
-                    if (preg_match('/id/', $item)) {
-                        $type = 'integer';
+
+                    $var = 'string';
+                    if (preg_match('/int/', $type)) {
+                        $var = 'integer';
+                    } elseif (preg_match('/decimal/', $type)) {
+                        $var = 'float';
                     }
-                    $property .= " * @property $type $" . $item;
+
+                    $property .= " * @property $var $" . $field;
                     $property .= "\n";
 
-                    if (preg_match('/_id|_no|phone|email$/', $item)) {
-                        $methods .= $method_params('_', $name, $item);
-                        $methods .= $method_params('__', $name, $item);
-                        $methods .= $method_params('___', $name, $item);
+                    if (preg_match('/_id|_no|phone|email$/', $field) || $key) {
+                        $methods .= $method_params('_', $cla_name, $field);
+                        $methods .= $method_params('__', $cla_name, $field);
+                        $methods .= $method_params('___', $cla_name, $field);
+                    } elseif ($type == 'tinyint') {
+                        $methods .= $method_params('__', $cla_name, $field);
+                        $methods .= $method_params('___', $cla_name, $field);
                     }
                 }
             }

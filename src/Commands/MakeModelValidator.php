@@ -4,9 +4,7 @@
 namespace Magein\Common\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use magein\tools\common\Variable;
 
 class MakeModelValidator extends Command
@@ -245,7 +243,9 @@ Usage：
         }
 
         $class_name = $name;
-        if (preg_match('/s$/', $class_name)) {
+        if (preg_match('/ies$/', $class_name)) {
+            $class_name = preg_replace('/ies$/', 'y', $class_name);
+        } elseif (preg_match('/s$/', $class_name)) {
             $class_name = substr($class_name, 0, -1);
         }
 

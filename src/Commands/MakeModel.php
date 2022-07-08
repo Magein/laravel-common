@@ -5,7 +5,6 @@ namespace Magein\Common\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use magein\tools\common\Variable;
 
 class MakeModel extends Command
@@ -124,10 +123,14 @@ class MakeModel extends Command
         }
         $fillable .= "]";
 
-        $call = function () use ($name, $request) {
-            $this->call('model:property', ['name' => $name]);
+        $call = function () use ($name, $request,$ignore) {
+            $params = [
+                'name' => $name,
+                '--ignore' => $ignore
+            ];
+            $this->call('model:property', $params);
             if ($request) {
-                $this->call('model:validate', ['name' => $name]);
+                $this->call('model:validate', $params);
             }
         };
 
